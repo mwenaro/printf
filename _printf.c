@@ -11,33 +11,44 @@
 
 int _printf(const char *format, ...)
 {
-	va_list args;
+	va_list ap;
+	int (*f)(va_list);
+	unsigned int i = 0, counter = 0;
 
-	va_start(args, format);
+	if (format == NULL)
+		return (-1);
 
-	while (*format != '\0')
+	va_start(ap, format);
+	while (format && format[i])
 	{
-		if (*format == 's')
+		if (format[i] != '%')
 		{
-			int i = va_arg(args, int);
-
-			_printf(i);
-		} else if (*format == 'c')
-		{
-		       /*
-			*'char' variable will be promoted to 'int'
-			* A character literal in C is already 'int' by itself
-			*/
-			int c = va_arg(args, int);
-
-			_printf(c);
+			_putchar(format[i]);
+			counter++;
+			i++;
+			continue;
 		}
-
-
+		else
+		{
+			if (format[i + 1] == '%')
+			{
+				_putchar('%');
+				counter++;
+				i += 2;
+				continue;
+			}
+			else
+			{
+				f = check_format(&format[i + 1]);
+				if (f == NULL)
+					return (-1);
+				i += 2;
+				counter += f(ap);
+				continue;
+			}
+		}
+		i++;
 	}
-	++format;
-}
-
-va_end(args);
-return (0);
+	va_end(ap);
+	return (counter);
 }
